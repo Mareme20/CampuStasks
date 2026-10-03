@@ -1,2 +1,15 @@
 package sn.campustasks.domain.enums;
-public enum Statut { A_FAIRE, EN_COURS, TERMINEE }
+
+/**
+ * Énumération représentant le statut d'avancement d'une tâche étudiante.
+ */
+public enum Statut {
+  /** La tâche est à réaliser. */
+  A_FAIRE,
+
+  /** La tâche est actuellement en cours de réalisation. */
+  EN_COURS,
+
+  /** La tâche a été finalisée. */
+  TERMINEE
+}

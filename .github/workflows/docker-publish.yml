@@ -1,39 +1,62 @@
+# ==============================================================================
+# Pipeline de Publication Continue (CD) - Image Docker Hub
+# ==============================================================================
+# Ce workflow construit l'image Docker de production de l'API backend
+# et la publie automatiquement sur le registre Docker Hub.
+# Déclencheurs :
+#   - Push direct ou merge sur la branche 'main'
+#   - Création d'un tag git de version (ex: v1.0.0)
+#   - Déclenchement manuel via l'interface GitHub Actions (workflow_dispatch)
+# Secrets requis dans GitHub Repository Settings > Secrets and variables > Actions :
+#   - DOCKERHUB_USERNAME : Identifiant du compte Docker Hub
+#   - DOCKERHUB_TOKEN    : Jeton d'accès personnel (Access Token) Docker Hub
+# ==============================================================================
+
 name: Publish Docker image
 
 on:
   push:
-    branches: [main]
-    tags: ["v*"]
-  workflow_dispatch:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch: # Permet de lancer le workflow manuellement depuis GitHub
 
-jobs: 
+jobs:
   docker:
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
+      # Étape 1 : Récupération du code source complet
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
+      # Étape 2 : Configuration de QEMU pour le support d'architectures multiplateformes
+      - name: Configuration de QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Set up Docker Buildx
+      # Étape 3 : Initialisation du constructeur Docker Buildx (optimisations de cache)
+      - name: Configuration de Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      # Étape 4 : Authentification sécurisée auprès du registre Docker Hub
+      - name: Connexion à Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push backend image
+      # Étape 5 : Construction de l'image Docker multi-stage et publication sur Docker Hub
+      - name: Construction et publication de l'image Backend
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
+          # Tags générés : 'latest' (dernière version) et le SHA du commit pour la traçabilité
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/campus-tasks-api:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/campus-tasks-api:${{ github.sha }}

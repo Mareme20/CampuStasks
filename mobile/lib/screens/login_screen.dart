@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../repositories/auth_repository.dart';
 import '../repositories/task_repository.dart';
 import 'home_screen.dart';
 
+/// Écran d'authentification de l'application.
+/// Il permet à l'utilisateur de se connecter ou de créer un compte
+/// avant d'accéder à la gestion des matières et des tâches.
 class LoginScreen extends StatefulWidget {
   final AuthRepository auth;
   final TaskRepository tasks;
