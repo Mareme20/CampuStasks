@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-campus_tasks}
+      POSTGRES_USER: ${POSTGRES_USER:-campus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-campus_password}
+    volumes:
+      - campus_tasks_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U ${POSTGRES_USER:-campus} -d ${POSTGRES_DB:-campus_tasks}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build: ../backend
+    image: ${DOCKERHUB_USERNAME:-nom-du-groupe}/campus-tasks-api:${APP_VERSION:-1.0.0}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: postgres
+      DB_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-campus_tasks}
+      POSTGRES_USER: ${POSTGRES_USER:-campus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-campus_password}
+      JWT_SECRET: ${JWT_SECRET:-CHANGE_ME_WITH_AT_LEAST_32_CHARACTERS}
+    ports: ["8080:8080"]
+volumes:
+  campus_tasks_pgdata:

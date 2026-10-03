@@ -1,0 +1,10 @@
+.env
+target/
+.idea/
+.vscode/
+.dart_tool/
+build/
+.gradle/
+*.jks
+*.keystore
+key.properties
